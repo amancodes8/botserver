@@ -9,49 +9,40 @@ const rateLimit = require('express-rate-limit');
 // Create Express app
 const app = express();
 
-// Enhanced CORS configuration
-const corsOptions = {
-  origin: [
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'http://localhost:3000'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
-  credentials: true
-};
+// Allow all origins (for dev/testing purposes)
+app.use(cors()); // 🔓 Allow all origins without restriction
 
-// Middleware
-app.use(cors(corsOptions));
+// Security middlewares
 app.use(helmet());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000 // limit each IP to 1000 requests per windowMs
-});
-app.use(limiter);
-
 // Logging
 app.use(morgan('dev'));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 1000, // limit per IP
+  message: '⚠️ Too many requests from this IP. Please try again later.'
+});
+app.use(limiter);
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/healthbot')
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Health check endpoint
+// Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
-    timestamp: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    time: new Date().toISOString(),
+    db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
-// Import routes
+// Routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const questionRoutes = require('./routes/questions');
@@ -69,22 +60,21 @@ app.use('/api/admin', adminRoutes);
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Endpoint not found'
+    message: '❌ API endpoint not found'
   });
 });
 
-// Error handler
+// Central Error Handler
 app.use((err, req, res, next) => {
-  console.error('🔥 Error:', err.stack);
-  
+  console.error('🔥 Server Error:', err.stack);
   res.status(500).json({
     success: false,
-    message: 'Internal Server Error'
+    message: '🚨 Internal Server Error',
   });
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

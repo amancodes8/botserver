@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
 const User = require('../models/User');
-const sendEmail = require('../utils/email'); // You'll need to implement this
+const sendEmail = require('../utils/email');
 
 // @route    POST api/auth/register
 // @desc     Register user
@@ -16,31 +15,29 @@ router.post('/register', [
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       success: false,
       errors: errors.array().map(err => ({
         param: err.param,
         msg: err.msg
-      })) 
+      }))
     });
   }
 
   const { name, email, password, role = 'user' } = req.body;
 
   try {
-    // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
         success: false,
-        errors: [{ 
+        errors: [{
           param: 'email',
-          msg: 'User already exists' 
+          msg: 'User already exists'
         }]
       });
     }
 
-    // Create user
     user = new User({
       name,
       email,
@@ -48,13 +45,9 @@ router.post('/register', [
       role
     });
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
+    // Let the schema hash the password
     await user.save();
 
-    // Generate JWT
     const payload = {
       user: {
         id: user.id,
@@ -83,10 +76,7 @@ router.post('/register', [
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -111,7 +101,6 @@ router.post('/login', [
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
@@ -123,8 +112,7 @@ router.post('/login', [
       });
     }
 
-    // Validate password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({
         success: false,
@@ -135,7 +123,6 @@ router.post('/login', [
       });
     }
 
-    // Generate JWT
     const payload = {
       user: {
         id: user.id,
@@ -164,10 +151,7 @@ router.post('/login', [
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -176,44 +160,26 @@ router.post('/login', [
 // @access   Private
 router.get('/user', async (req, res) => {
   try {
-    // Get token from header
     const token = req.header('x-auth-token');
-    
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token, authorization denied'
-      });
+      return res.status(401).json({ success: false, message: 'No token, authorization denied' });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.user.id).select('-password');
-    
+
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.json({
-      success: true,
-      user
-    });
+    res.json({ success: true, user });
 
   } catch (err) {
     console.error(err.message);
     if (err.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token'
-      });
+      return res.status(401).json({ success: false, message: 'Invalid token' });
     }
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -225,10 +191,7 @@ router.post('/forgot-password', [
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array()
-    });
+    return res.status(400).json({ success: false, errors: errors.array() });
   }
 
   const { email } = req.body;
@@ -236,26 +199,19 @@ router.post('/forgot-password', [
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      // Don't reveal if user doesn't exist
-      return res.json({
-        success: true,
-        message: 'If an account exists with this email, a reset link has been sent'
-      });
+      return res.json({ success: true, message: 'If an account exists with this email, a reset link has been sent' });
     }
 
-    // Create reset token (expires in 1 hour)
     const resetToken = jwt.sign(
       { user: { id: user.id } },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Save reset token to user (optional)
     user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    user.resetTokenExpiry = Date.now() + 3600000;
     await user.save();
 
-    // Send email
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     
     await sendEmail({
@@ -264,17 +220,11 @@ router.post('/forgot-password', [
       message: `You requested a password reset. Click this link to reset your password: ${resetUrl}`
     });
 
-    res.json({
-      success: true,
-      message: 'Password reset link sent to email'
-    });
+    res.json({ success: true, message: 'Password reset link sent to email' });
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -287,67 +237,32 @@ router.post('/reset-password', [
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array()
-    });
+    return res.status(400).json({ success: false, errors: errors.array() });
   }
 
   const { token, password } = req.body;
 
   try {
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.user.id);
 
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid token'
-      });
+    if (!user || user.resetToken !== token || Date.now() > user.resetTokenExpiry) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
     }
 
-    // Check if token matches stored token (if you're storing it)
-    if (user.resetToken !== token) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired token'
-      });
-    }
-
-    // Check if token is expired
-    if (Date.now() > user.resetTokenExpiry) {
-      return res.status(400).json({
-        success: false,
-        message: 'Token has expired'
-      });
-    }
-
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    user.password = password;
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
-    
     await user.save();
 
-    res.json({
-      success: true,
-      message: 'Password updated successfully'
-    });
+    res.json({ success: true, message: 'Password updated successfully' });
 
   } catch (err) {
     console.error(err.message);
     if (err.name === 'JsonWebTokenError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired token'
-      });
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
     }
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
