@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Bot API Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+        }
+        
+        .auth-status {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info {
+            margin-right: 15px;
+            text-align: right;
+        }
+        
+        .user-email {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e5177b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #3ab5d8;
+            transform: translateY(-2px);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .link {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .radio-group {
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .radio-option input {
+            margin-right: 10px;
+        }
+        
+        .option-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .option-inputs input {
+            flex: 1;
+        }
+        
+        .add-option-btn {
+            margin-bottom: 15px;
+        }
+        
+        .alert {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .mt-3 {
+            margin-top: 15px;
+        }
+        
+        .mb-3 {
+            margin-bottom: 15px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .auth-status {
+                margin-top: 15px;
+            }
+            
+            .user-info {
+                text-align: center;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>Health Bot API Tester</span>
+            </div>
+            <div id="auth-status" class="auth-status hidden">
+                <div class="user-info">
+                    <div class="user-email" id="current-user"></div>
+                    <div class="user-role" id="current-role"></div>
+                </div>
+                <button id="logout" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Auth Section -->
+        <section id="auth-section">
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active" data-tab="register">Register</div>
+                    <div class="tab" data-tab="login">Login</div>
+                    <div class="tab" data-tab="forgot-password">Forgot Password</div>
+                </div>
+                
+                <div id="register-form" class="tab-content active">
+                    <form id="register">
+                        <div class="form-group">
+                            <label for="reg-name" class="form-label">Name</label>
+                            <input type="text" id="reg-name" class="form-control" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-email" class="form-label">Email</label>
+                            <input type="email" id="reg-email" class="form-control" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password" class="form-label">Password</label>
+                            <input type="password" id="reg-password" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-role" class="form-label">Role</label>
+                            <select id="reg-role" class="form-control">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                    </form>
+                </div>
+                
+                <div id="login-form" class="tab-content">
+                    <form id="login">
+                        <div class="form-group">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" id="login-email" class="form-control" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" id="login-password" class="form-control" placeholder="Your password" required>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="link" id="show-forgot-password">Forgot password?</span>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="forgot-password-form" class="tab-content">
+                    <form id="forgot-password">
+                        <div class="form-group">
+                            <label for="forgot-email" class="form-label">Email</label>
+                            <input type="email" id="forgot-email" class="form-control" placeholder="your@email.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                    </form>
+                    
+                    <div id="reset-token-form" class="hidden mt-3">
+                        <div class="form-group">
+                            <label for="reset-token" class="form-label">Reset Token</label>
+                            <input type="text" id="reset-token" class="form-control" placeholder="Enter token from email">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password" class="form-label">New Password</label>
+                            <input type="password" id="new-password" class="form-control" placeholder="At least 6 characters" minlength="6">
+                        </div>
+                        <button id="reset-password-btn" class="btn btn-success">Reset Password</button>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <span class="link" id="back-to-login">Back to Login</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Main Content (shown after login) -->
+        <div id="main-content" class="hidden">
+            <div class="grid">
+                <!-- User Section -->
+                <section id="user-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">User Dashboard</h3>
+                            <button id="get-dashboard" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <pre id="dashboard-result">Click "Refresh" to load dashboard data</pre>
+                        
+                        <div class="card-header">
+                            <h3 class="card-title">Update Profile</h3>
+                        </div>
+                        <form id="update-profile">
+                            <div class="form-group">
+                                <label for="update-name" class="form-label">Name</label>
+                                <input type="text" id="update-name" class="form-control" placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label for="update-dob" class="form-label">Date of Birth</label>
+                                <input type="date" id="update-dob" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="update-gender" class="form-label">Gender</label>
+                                <select id="update-gender" class="form-control">
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+                </section>
+                
+                <!-- Questions Section -->
+                <section id="questions-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Health Questions</h3>
+                            <button id="get-questions" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <pre id="questions-result">Click "Refresh" to load questions</pre>
+                    </div>
+                    
+                    <div id="admin-questions" class="card hidden">
+                        <div class="card-header">
+                            <h3 class="card-title">Add New Question</h3>
+                        </div>
+                        <form id="add-question">
+                            <div class="form-group">
+                                <label for="question-text" class="form-label">Question Text</label>
+                                <textarea id="question-text" class="form-control" placeholder="Enter question text" rows="3" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Options</label>
+                                <div id="question-options">
+                                    <div class="option-inputs">
+                                        <input type="text" class="form-control option-text" placeholder="Option text" required>
+                                        <input type="number" class="form-control option-score" placeholder="Score" required>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-option" class="btn btn-success add-option-btn">
+                                    <i class="fas fa-plus"></i> Add Option
+                                </button>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Add Question</button>
+                        </form>
+                    </div>
+                </section>
+                
+                <!-- Assessment Section -->
+                <section id="assessment-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Take Assessment</h3>
+                        </div>
+                        <form id="take-assessment">
+                            <div id="assessment-questions" class="form-group">
+                                <p>Please load questions first by clicking "Refresh" in the Questions section.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="assessment-notes" class="form-label">Additional Notes</label>
+                                <textarea id="assessment-notes" class="form-control" placeholder="Any additional information (optional)" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Assessment</button>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">My Assessments</h3>
+                            <button id="get-assessments" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <pre id="assessments-result">Click "Refresh" to load your assessments</pre>
+                    </div>
+                </section>
+                
+                <!-- Admin Section -->
+                <section id="admin-section" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Admin Dashboard</h3>
+                            <button id="get-admin-stats" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <pre id="admin-stats">Click "Refresh" to load admin stats</pre>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">User Management</h3>
+                            <button id="get-all-users" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <pre id="all-users">Click "Refresh" to load all users</pre>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Base URL - Update if your server is running on different port
+        const BASE_URL = 'http://localhost:5000/api';
+        let authToken = localStorage.getItem('authToken') || '';
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        
+        // Initialize the UI
+        function initUI() {
+            if (authToken && currentUser) {
+                // Hide auth section and show main content
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                
+                // Update user info in header
+                document.getElementById('auth-status').classList.remove('hidden');
+                document.getElementById('current-user').textContent = currentUser.email;
+                document.getElementById('current-role').textContent = currentUser.role;
+                
+                // Show admin section if user is admin
+                if (currentUser.role === 'admin') {
+                    document.getElementById('admin-section').classList.remove('hidden');
+                    document.getElementById('admin-questions').classList.remove('hidden');
+                }
+            } else {
+                // Show auth section if not logged in
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('hidden');
+                document.getElementById('auth-status').classList.add('hidden');
+            }
+        }
+        
+        // Make API requests
+        async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (requiresAuth && authToken) {
+                headers['x-auth-token'] = authToken;
+            }
+            
+            const config = {
+                method,
+                headers
+            };
+            
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}${endpoint}`, config);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Request failed');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+        
+        // Show alert message
+        function showAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Position the alert
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '1000';
+            alert.style.maxWidth = '400px';
+            alert.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => alert.remove(), 500);
+            }, 5000);
+        }
+        
+        // Tab switching functionality
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-form`).classList.add('active');
+                });
+            });
+            
+            document.getElementById('show-forgot-password').addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.querySelector('.tab[data-tab="forgot-password"]').classList.add('active');
+                document.getElementById('forgot-password-form').classList.add('active');
+            });
+            
+            document.getElementById('back-to-login').addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.querySelector('.tab[data-tab="login"]').classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            });
+        }
+        
+        // Event Listeners
+        document.getElementById('register').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    name: document.getElementById('reg-name').value,
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-password').value,
+                    role: document.getElementById('reg-role').value
+                };
+                
+                await makeRequest('POST', '/auth/register', data, false);
+                showAlert('Registration successful! Please login.');
+                
+                // Switch to login tab
+                document.querySelector('.tab[data-tab="login"]').click();
+                document.getElementById('login-email').value = data.email;
+                document.getElementById('login-password').value = '';
+                document.getElementById('login-password').focus();
+            } catch (error) {
+                showAlert(`Registration failed: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    email: document.getElementById('login-email').value,
+                    password: document.getElementById('login-password').value
+                };
+                
+                const result = await makeRequest('POST', '/auth/login', data, false);
+                authToken = result.token;
+                localStorage.setItem('authToken', authToken);
+                
+                // Get user details
+                const user = await makeRequest('GET', '/auth/me');
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                initUI();
+                showAlert('Login successful!');
+            } catch (error) {
+                showAlert(`Login failed: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('forgot-password').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const email = document.getElementById('forgot-email').value;
+                await makeRequest('POST', '/auth/forgot-password', { email }, false);
+                showAlert('Password reset link sent to your email. Please check your inbox.');
+                document.getElementById('reset-token-form').classList.remove('hidden');
+            } catch (error) {
+                showAlert(`Failed to send reset link: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('reset-password-btn').addEventListener('click', async () => {
+            try {
+                const email = document.getElementById('forgot-email').value;
+                const token = document.getElementById('reset-token').value;
+                const newPassword = document.getElementById('new-password').value;
+                
+                if (!token || !newPassword) {
+                    throw new Error('Please enter both token and new password');
+                }
+                
+                await makeRequest('POST', '/auth/reset-password', {
+                    email,
+                    token,
+                    newPassword
+                }, false);
+                
+                showAlert('Password reset successfully! You can now login with your new password.');
+                
+                // Switch to login tab
+                document.querySelector('.tab[data-tab="login"]').click();
+                document.getElementById('login-email').value = email;
+                document.getElementById('login-password').value = '';
+                document.getElementById('reset-token-form').classList.add('hidden');
+                document.getElementById('forgot-password').reset();
+            } catch (error) {
+                showAlert(`Password reset failed: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('logout').addEventListener('click', () => {
+            authToken = '';
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            initUI();
+            showAlert('You have been logged out.');
+        });
+        
+        document.getElementById('get-dashboard').addEventListener('click', async () => {
+            try {
+                const dashboard = await makeRequest('GET', '/users/dashboard');
+                document.getElementById('dashboard-result').textContent = JSON.stringify(dashboard, null, 2);
+                showAlert('Dashboard data loaded successfully!');
+            } catch (error) {
+                showAlert(`Failed to get dashboard: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('update-profile').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    name: document.getElementById('update-name').value || undefined,
+                    dateOfBirth: document.getElementById('update-dob').value || undefined,
+                    gender: document.getElementById('update-gender').value || undefined
+                };
+                
+                const updatedUser = await makeRequest('PUT', '/users/update', data);
+                currentUser = updatedUser;
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                showAlert('Profile updated successfully!');
+            } catch (error) {
+                showAlert(`Profile update failed: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('get-questions').addEventListener('click', async () => {
+            try {
+                const questions = await makeRequest('GET', '/questions');
+                document.getElementById('questions-result').textContent = JSON.stringify(questions, null, 2);
+                
+                // Populate assessment questions
+                const assessmentQuestionsEl = document.getElementById('assessment-questions');
+                assessmentQuestionsEl.innerHTML = '';
+                
+                questions.forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `
+                        <h4>${i+1}. ${q.questionText}</h4>
+                        <div class="radio-group">
+                            ${q.options.map((opt, j) => `
+                                <div class="radio-option">
+                                    <input type="radio" name="q-${q._id}" id="q-${q._id}-${j}" value="${opt._id}" data-question="${q._id}">
+                                    <label for="q-${q._id}-${j}">${opt.text} (Score: ${opt.score})</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    assessmentQuestionsEl.appendChild(div);
+                });
+                
+                showAlert('Questions loaded successfully!');
+            } catch (error) {
+                showAlert(`Failed to get questions: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('take-assessment').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const answers = [];
+                const radioButtons = document.querySelectorAll('#assessment-questions input[type="radio"]:checked');
+                
+                if (radioButtons.length === 0) {
+                    throw new Error('Please answer at least one question');
+                }
+                
+                radioButtons.forEach(radio => {
+                    answers.push({
+                        questionId: radio.dataset.question,
+                        optionId: radio.value
+                    });
+                });
+                
+                const data = {
+                    answers,
+                    notes: document.getElementById('assessment-notes').value
+                };
+                
+                const assessment = await makeRequest('POST', '/assessments', data);
+                showAlert(`Assessment submitted! Total score: ${assessment.totalScore}`);
+                document.getElementById('take-assessment').reset();
+            } catch (error) {
+                showAlert(`Assessment failed: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('get-assessments').addEventListener('click', async () => {
+            try {
+                const assessments = await makeRequest('GET', '/assessments');
+                document.getElementById('assessments-result').textContent = JSON.stringify(assessments, null, 2);
+                showAlert('Assessments loaded successfully!');
+            } catch (error) {
+                showAlert(`Failed to get assessments: ${error.message}`, 'danger');
+            }
+        });
+        
+        // Admin functions
+        document.getElementById('get-admin-stats').addEventListener('click', async () => {
+            try {
+                const stats = await makeRequest('GET', '/admin/stats');
+                document.getElementById('admin-stats').textContent = JSON.stringify(stats, null, 2);
+                showAlert('Admin stats loaded successfully!');
+            } catch (error) {
+                showAlert(`Failed to get stats: ${error.message}`, 'danger');
+            }
+        });
+        
+        document.getElementById('get-all-users').addEventListener('click', async () => {
+            try {
+                const users = await makeRequest('GET', '/admin/users');
+                document.getElementById('all-users').textContent = JSON.stringify(users, null, 2);
+                showAlert('Users data loaded successfully!');
+            } catch (error) {
+                showAlert(`Failed to get users: ${error.message}`, 'danger');
+            }
+        });
+        
+        // Question management (admin only)
+        document.getElementById('add-option').addEventListener('click', () => {
+            const optionsEl = document.getElementById('question-options');
+            const div = document.createElement('div');
+            div.className = 'option-inputs';
+            div.innerHTML = `
+                <input type="text" class="form-control option-text" placeholder="Option text" required>
+                <input type="number" class="form-control option-score" placeholder="Score" required>
+            `;
+            optionsEl.appendChild(div);
+        });
+        
+        document.getElementById('add-question').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const options = [];
+                const optionEls = document.querySelectorAll('.option-inputs');
+                
+                optionEls.forEach(opt => {
+                    options.push({
+                        text: opt.querySelector('.option-text').value,
+                        score: parseInt(opt.querySelector('.option-score').value)
+                    });
+                });
+                
+                const data = {
+                    questionText: document.getElementById('question-text').value,
+                    options
+                };
+                
+                const question = await makeRequest('POST', '/admin/questions', data);
+                showAlert('Question added successfully!');
+                document.getElementById('add-question').reset();
+                document.getElementById('question-options').innerHTML = `
+                    <div class="option-inputs">
+                        <input type="text" class="form-control option-text" placeholder="Option text" required>
+                        <input type="number" class="form-control option-score" placeholder="Score" required>
+                    </div>
+                `;
+            } catch (error) {
+                showAlert(`Failed to add question: ${error.message}`, 'danger');
+            }
+        });
+        
+        // Initialize the app
+        setupTabs();
+        initUI();
+        
+        // If logged in, load dashboard data automatically
+        if (authToken) {
+            document.getElementById('get-dashboard').click();
+            document.getElementById('get-questions').click();
+        }
+    </script>
+</body>
+</html>
